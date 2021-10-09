@@ -88,44 +88,53 @@ function App() {
     <div className='App'>
       <header className='App-header'>
         <img src={logo} className='App-logo' alt='logo' />
-        {(state.step === STEP.Idle || state.step === STEP.WaitForStart) && (
-          <>
-            <input
-              type='text'
-              pattern='[0-9]*'
-              value={state.orderedCount ?? ''}
-              onChange={(event) => {
-                const count = parseInt(event.target.value)
-                if (typeof count === 'number' && !isNaN(count)) {
-                  dispatch({
-                    type: 'setCount',
-                    count,
-                  })
-                } else {
-                  dispatch({
-                    type: 'clearCount',
-                  })
-                }
-              }}
-            />
+        <div className='App-container'>
+          {(state.step === STEP.Idle || state.step === STEP.WaitForStart) && (
+            <div>
+              <input
+                type='text'
+                pattern='[0-9]*'
+                value={state.orderedCount ?? ''}
+                placeholder='Please enter a number'
+                onChange={(event) => {
+                  const count = parseInt(event.target.value)
+                  if (typeof count === 'number' && !isNaN(count)) {
+                    dispatch({
+                      type: 'setCount',
+                      count,
+                    })
+                  } else {
+                    dispatch({
+                      type: 'clearCount',
+                    })
+                  }
+                }}
+              />
 
-            {state.orderedCount && (
-              <button onClick={() => dispatch({ type: 'setWaitForPoints' })}>
-                Calculate!
+              {state.orderedCount && (
+                <div>
+                  <button
+                    onClick={() => dispatch({ type: 'setWaitForPoints' })}
+                  >
+                    Calculate!
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          {state.step === STEP.WaitForPoints && (
+            <div>Generating points ...</div>
+          )}
+          {state.step === STEP.CaluculatePi && <div>Calculating PI ...</div>}
+          {state.step === STEP.ShowPi && (
+            <>
+              <div>{state.piValue}</div>
+              <button onClick={() => dispatch({ type: 'reset' })}>
+                Start from scratch!
               </button>
-            )}
-          </>
-        )}
-        {state.step === STEP.WaitForPoints && <div>Generating points ...</div>}
-        {state.step === STEP.CaluculatePi && <div>Calculating PI ...</div>}
-        {state.step === STEP.ShowPi && (
-          <>
-            <div>{state.piValue}</div>
-            <button onClick={() => dispatch({ type: 'reset' })}>
-              Start from scratch!
-            </button>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </header>
     </div>
   )
