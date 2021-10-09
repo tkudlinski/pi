@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "workspaces": [
+    "ui",
+    "api"
+  ],
+  "scripts": {
+    "start": "concurrently \"yarn start:api\" \"yarn start:ui\"",
+    "start:ui": "yarn workspace ui start",
+    "start:api": "yarn workspace api start"
+  },
+  "devDependencies": {
+    "concurrently": "^6.3.0"
+  }
+}
