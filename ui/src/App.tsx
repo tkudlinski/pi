@@ -1,6 +1,7 @@
 import { useEffect, useReducer } from 'react'
 import logo from './logo.svg'
 import './App.css'
+import { Points, calculatePi } from './utils'
 
 enum STEP {
   Idle,
@@ -11,10 +12,6 @@ enum STEP {
 }
 
 const apiUrl = (count: number) => `http://localhost:3001/points?count=${count}`
-
-type Point = [number, number]
-
-type Points = Array<Point>
 
 interface State {
   step: STEP
@@ -34,15 +31,19 @@ const initialState: State = {
 
 type Action =
   | { type: 'setCount'; count: number }
+  | { type: 'clearCount' }
   | { type: 'setWaitForPoints' }
   | { type: 'setPoints'; points: Points }
   | { type: 'setFailure'; error: string }
   | { type: 'setPi'; piValue: number }
+  | { type: 'reset' }
 
 function reducer(state: State, action: Action) {
   switch (action.type) {
     case 'setCount':
       return { ...state, orderedCount: action.count, step: STEP.WaitForStart }
+    case 'clearCount':
+      return { ...state, orderedCount: null }
     case 'setWaitForPoints':
       return { ...state, step: STEP.WaitForPoints }
     case 'setPoints':
@@ -50,7 +51,9 @@ function reducer(state: State, action: Action) {
     case 'setPi':
       return { ...state, piValue: action.piValue, step: STEP.ShowPi }
     case 'setFailure':
-      return { ...state, error: action.error, step: STEP.Idle }
+      return { ...initialState }
+    case 'reset':
+      return { ...initialState }
     default:
       throw new Error()
   }
@@ -60,45 +63,69 @@ function App() {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
-    if (state.step === STEP.WaitForPoints && state.orderedCount)
+    if (state.step === STEP.WaitForPoints && state.orderedCount) {
       fetch(apiUrl(state.orderedCount))
         .then((data) => data.json())
-        .then((points) => {
+        .then(({ points }) => {
           if (Array.isArray(points)) {
             dispatch({ type: 'setPoints', points })
           }
         })
-        .catch((err) => console.log('Sth went bad!'))
+        .catch((err) => {
+          console.log('Sth went bad!')
+          dispatch({ type: 'reset' })
+        })
+    } else if (state.step === STEP.CaluculatePi && state.orderedCount) {
+      dispatch({
+        type: 'setPi',
+        piValue: calculatePi(state.points as Points, state.orderedCount),
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.step])
-
-  console.log('AAA state', state)
 
   return (
     <div className='App'>
       <header className='App-header'>
         <img src={logo} className='App-logo' alt='logo' />
         {(state.step === STEP.Idle || state.step === STEP.WaitForStart) && (
-          <input
-            type='text'
-            pattern='[0-9]*'
-            value={state.orderedCount ?? ''}
-            onChange={(event) => {
-              const count = parseInt(event.target.value)
-              if (typeof count === 'number' && !isNaN(count)) {
-                dispatch({
-                  type: 'setCount',
-                  count,
-                })
-              }
-            }}
-          />
+          <>
+            <input
+              type='text'
+              pattern='[0-9]*'
+              value={state.orderedCount ?? ''}
+              onChange={(event) => {
+                const count = parseInt(event.target.value)
+                if (typeof count === 'number' && !isNaN(count)) {
+                  dispatch({
+                    type: 'setCount',
+                    count,
+                  })
+                } else {
+                  dispatch({
+                    type: 'clearCount',
+                  })
+                }
+              }}
+            />
+
+            {state.orderedCount && (
+              <button onClick={() => dispatch({ type: 'setWaitForPoints' })}>
+                Calculate!
+              </button>
+            )}
+          </>
         )}
-        <button
-          onClick={() => dispatch({ type: 'setWaitForPoints' })}
-          className='App-container'
-        >
-          Calculate!
-        </button>
+        {state.step === STEP.WaitForPoints && <div>Generating points ...</div>}
+        {state.step === STEP.CaluculatePi && <div>Calculating PI ...</div>}
+        {state.step === STEP.ShowPi && (
+          <>
+            <div>{state.piValue}</div>
+            <button onClick={() => dispatch({ type: 'reset' })}>
+              Start from scratch!
+            </button>
+          </>
+        )}
       </header>
     </div>
   )
