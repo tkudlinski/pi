@@ -125,10 +125,10 @@ function App() {
           {state.step === STEP.WaitForPoints && (
             <div>Generating points ...</div>
           )}
-          {state.step === STEP.CaluculatePi && <div>Calculating PI ...</div>}
+          {state.step === STEP.CaluculatePi && <div>Calculating Pi ...</div>}
           {state.step === STEP.ShowPi && (
             <>
-              <div>{state.piValue}</div>
+              <div>Calculated Pi value: {state.piValue}</div>
               <button onClick={() => dispatch({ type: 'reset' })}>
                 Start from scratch!
               </button>
