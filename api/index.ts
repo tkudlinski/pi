@@ -13,8 +13,8 @@ app.get('/points', (req, res) => {
   const count = req.query?.count ? parseInt(req.query?.count as string) : 1
   res.json({
     points: Array.from({ length: count }, () => [
-      random.float(),
-      random.float(),
+      random.uniform()(),
+      random.uniform()(),
     ]),
   })
 })
