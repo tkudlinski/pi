@@ -1,6 +1,6 @@
-# Getting Started with Create React App
+# PI Number
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Approximate the number Pi using a Monte Carlo method
 
 ## Available Scripts
 
